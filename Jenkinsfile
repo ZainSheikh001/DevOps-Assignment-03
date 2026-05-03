@@ -54,14 +54,8 @@ pipeline {
 
         stage('Run Selenium Tests') {
             steps {
-                sh '''
-                    cd selenium-tests
-                    docker build -t selenium-tests:latest .
-                    docker run --rm \
-                        --name selenium-runner \
-                        -e APP_URL=http://34.229.217.192:3000 \
-                        selenium-tests:latest
-                '''
+                sh 'cd selenium-tests && docker build -t selenium-tests:latest .'
+                sh 'docker run --rm --name selenium-runner -e APP_URL=http://34.229.217.192:3000 selenium-tests:latest'
             }
         }
     }
@@ -71,47 +65,66 @@ pipeline {
             sh 'docker logout || true'
         }
         success {
-            mail to: 'zain.haq.ds@gmail.com',
-                 subject: "✅ Pipeline SUCCESS - Job Portal Tests Passed",
-                 body: """
-Hello,
-
-The Jenkins pipeline ran successfully!
+            emailext(
+                to: 'zain.haq.ds@gmail.com',
+                subject: "SUCCESS - Job Portal Tests Passed - Build ${env.BUILD_NUMBER}",
+                body: """
+Jenkins Pipeline - Build ${env.BUILD_NUMBER} - SUCCESS
 
 Repository: https://github.com/ZainSheikh001/DevOps-Assignment-03
+Triggered by: GitHub Push
 Branch: main
-Build: #${env.BUILD_NUMBER}
-Status: SUCCESS ✅
 
-All 15 Selenium test cases PASSED.
+TEST RESULTS:
+=============
+All 15 Selenium Test Cases PASSED
 
-App is live at: http://34.229.217.192:3000
+TC01: Homepage loads successfully - PASSED
+TC02: Homepage body has content - PASSED
+TC03: Register page loads successfully - PASSED
+TC04: Register form has fullName field - PASSED
+TC05: Register form has email field - PASSED
+TC06: Register form has password field - PASSED
+TC07: User can register successfully - PASSED
+TC08: Login page loads successfully - PASSED
+TC09: Login form has email field - PASSED
+TC10: Login form has password field - PASSED
+TC11: Login with invalid credentials stays on login - PASSED
+TC12: User can login with valid credentials - PASSED
+TC13: Jobs page loads successfully - PASSED
+TC14: Profile page redirects unauthenticated user - PASSED
+TC15: Logout redirects to login or homepage - PASSED
 
-Jenkins: http://3.226.97.230:8080
+15 passing
+
+App URL: http://34.229.217.192:3000
+Jenkins: http://3.226.97.230:8080/job/jobportal-assignment3/
 
 Regards,
 Jenkins CI
-"""
+                """
+            )
         }
         failure {
-            mail to: 'zain.haq.ds@gmail.com',
-                 subject: "❌ Pipeline FAILED - Job Portal Tests Failed",
-                 body: """
-Hello,
-
-The Jenkins pipeline FAILED!
+            emailext(
+                to: 'zain.haq.ds@gmail.com',
+                subject: "FAILED - Job Portal Pipeline - Build ${env.BUILD_NUMBER}",
+                body: """
+Jenkins Pipeline - Build ${env.BUILD_NUMBER} - FAILED
 
 Repository: https://github.com/ZainSheikh001/DevOps-Assignment-03
+Triggered by: GitHub Push
 Branch: main
-Build: #${env.BUILD_NUMBER}
-Status: FAILED ❌
 
-Please check the console output:
-http://3.226.97.230:8080/job/jobportal-pipeline/
+Pipeline FAILED
+
+Please check console output:
+http://3.226.97.230:8080/job/jobportal-assignment3/
 
 Regards,
 Jenkins CI
-"""
+                """
+            )
         }
     }
 }
