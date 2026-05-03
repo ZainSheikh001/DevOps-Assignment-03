@@ -1,0 +1,12 @@
+{
+  "name": "selenium-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "mocha tests/app.test.js --timeout 60000 --reporter spec"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.18.1",
+    "mocha": "^10.4.0",
+    "chai": "^5.1.0"
+  }
+}
